@@ -41,6 +41,7 @@ requirements:
     - wrapt
   run:
     - ${{ pin_compatible('numpy') }}
+    - netCDF4
     - python
     - setuptools
     - wrapt
