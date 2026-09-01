@@ -1,0 +1,71 @@
+schema_version: 1
+
+context:
+  version: "1.4.2"
+
+package:
+  name: wrf-python
+  version: ${{ version }}
+
+source:
+  url: https://github.com/NCAR/wrf-python/archive/v${{ version }}.tar.gz
+  sha256: 48f360e3319c782e44653bc1e907842724873561c17dbbf1fe56ff625d3dab35
+
+build:
+  # windows disabled due to cmake being unable to find a fortran compiler
+  number: 2
+  skip: win
+  script:
+    content: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  prefix_detection:
+    ignore_binary_files: false
+
+requirements:
+  build:
+    - ${{ compiler('fortran') }}
+    - ${{ stdlib('c') }}
+    - ${{ compiler('c') }}
+    - cmake
+    - if: not win
+      then: make
+    - if: win
+      then: ninja
+  host:
+    - setuptools
+    - pip
+    - python
+    - python-build
+    - numpy
+    - scikit-build-core
+    # upstream has it as a requirement
+    - wrapt
+  run:
+    - ${{ pin_compatible('numpy') }}
+    - netCDF4
+    - python
+    - setuptools
+    - wrapt
+    - xarray
+
+tests:
+  - python:
+      imports:
+        - wrf
+      pip_check: false
+  - files:
+      source:
+        - test/ci_tests
+    script:
+      - cd test/ci_tests && python utests.py
+
+about:
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: Diagnostic and interpolation routines for WRF-ARW data.
+  homepage: https://github.com/NCAR/wrf-python
+
+extra:
+  recipe-maintainers:
+    - akrherz
+    - erogluorhan
+    - kafitzgerald
